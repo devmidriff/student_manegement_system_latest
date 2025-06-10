@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ParentModel extends Model
+class Parents extends Model
 {
     // Specify the table name since the model name is different
     protected $table = 'parents';
@@ -15,6 +15,13 @@ class ParentModel extends Model
         'user_id',
         'contact_number',
     ];
+ 
+
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'parent_student');
+    }
+
 
     /**
      * Get the user that owns the parent profile.

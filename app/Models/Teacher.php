@@ -16,6 +16,11 @@ class Teacher extends Model
         'subject',
     ];
 
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'teacher_student');
+    }
+
 
     /**
      * Get the user account for this teacher.

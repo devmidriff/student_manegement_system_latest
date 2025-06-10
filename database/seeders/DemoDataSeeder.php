@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
-use App\Models\ParentModel;
+use App\Models\Parents;
 
 class DemoDataSeeder extends Seeder
 {
@@ -68,11 +68,11 @@ class DemoDataSeeder extends Seeder
             'school_id' => $school->id,
         ]);
 
-        $parent = ParentModel::create([
+        $parent = Parents::create([
             'user_id' => $parentUser->id,
         ]);
 
-        // Relationships
+
         $teacher->students()->attach($student->id);
         $parent->students()->attach($student->id);
     }

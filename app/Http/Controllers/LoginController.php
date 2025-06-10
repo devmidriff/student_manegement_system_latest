@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+
+    /*
         public function login(Request $request)
             {
                 $credentials = $request->validate([
@@ -15,7 +17,6 @@ class LoginController extends Controller
 
                 if (Auth::attempt($credentials, $request->remember)) {
                     $request->session()->regenerate();
-                    $this->storeUserSessionData($request);
                     $role = Auth::user()->role;
                     return match ($role) {
                         'super_admin' => redirect()->intended('/dashboard'),
@@ -25,15 +26,34 @@ class LoginController extends Controller
                         'parent' => redirect()->intended('/dashboard'),
                         default => redirect()->intended('/dashboard'),
                     };
-
-
-
                 }
-
                 return back()->withErrors([
                     'email' => 'The provided credentials do not match our records.',
                 ]);
             }
+
+    */
+
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
+        }
+
+        $user = Auth::user();
+       // $token = $user->createToken('passportToken')->accessToken;
+
+       // return response()->json(compact('user', 'token'), 200);
+       return response()->json(compact('user'), 200);
+    }
+
+
 
         public function showLoginForm(){
            return view('login');
@@ -41,18 +61,5 @@ class LoginController extends Controller
 
 
 
-    protected function storeUserSessionData(Request $request)
-            {
-                $user = Auth::user();
-                session([
-                    'user_id' => $user->id,
-                    'user_name' => $user->name,
-                    'user_email' => $user->email,
-                    'user_role' => $user->role,
-                    'school_id' => $user->school_id, 
-                    'profile_image' => $user->profile_image,
-                    'permissions' => $user->permissions()->pluck('name')->toArray() 
-                ]);
-            }
 
 }
