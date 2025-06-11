@@ -7,50 +7,30 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
 
-    /*
-        public function login(Request $request)
-            {
-                $credentials = $request->validate([
-                    'email' => ['required', 'email'],
-                    'password' => ['required'],
-                ]);
-
-                if (Auth::attempt($credentials, $request->remember)) {
-                    $request->session()->regenerate();
-                    $role = Auth::user()->role;
-                    return match ($role) {
-                        'super_admin' => redirect()->intended('/dashboard'),
-                        'school_admin' => redirect()->intended('/dashboard'),
-                        'teacher' => redirect()->intended('/dashboard'),
-                        'student' => redirect()->intended('/dashboard'),
-                        'parent' => redirect()->intended('/dashboard'),
-                        default => redirect()->intended('/dashboard'),
-                    };
-                }
-                return back()->withErrors([
-                    'email' => 'The provided credentials do not match our records.',
-                ]);
-            }
-
-    */
-
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string|min:6',
-        ]);
+            $credentials = $request->validate([
+                'email'    => 'required|email',
+                'password' => 'required|string|min:8',
+            ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
-        }
+            // Step 2: Attempt to login
+            if (!Auth::attempt($credentials)) {
+                return back()->withErrors(['error' => 'Invalid credentials'])->withInput();
+            }
 
-        $user = Auth::user();
-       // $token = $user->createToken('passportToken')->accessToken;
+            // Step 3: Check user role after login
+            $user = Auth::user();
+            if (!in_array($user->role, ['super_admin', 'school_admin'])) {
+                Auth::logout(); 
+                return back()->withErrors(['error' => 'Unauthorized access.'])->withInput();
+            }
 
-       // return response()->json(compact('user', 'token'), 200);
-       return response()->json(compact('user'), 200);
+            // Step 4: Regenerate session and redirect to dashboard
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
+
     }
 
 
