@@ -13,7 +13,11 @@ class Teacher extends Model
     // Fields that can be mass-assigned
     protected $fillable = [
         'user_id',
-        'subject',
+        'subjects',
+        'phone',
+        'qualification',
+        'specialization',
+        'experience'
     ];
 
     public function students()

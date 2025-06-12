@@ -1,227 +1,125 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard | Admin Panel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Inside <head> -->
-<link rel="stylesheet" href="{{ asset('css/style.css') }}">
-<script src="{{ asset('js/custom.js') }}" defer ></script>
+@extends('layouts.mangement')
 
-</head>
-<body>
-
-    {{-- Sidebar --}}
-    <div class="sidebar">
-        <h4>Welcome, {{ auth()->user()->name }}</h4>
-        <p>Role: <strong>{{ auth()->user()->role }}</strong></p>
-        <hr>
-        <a href="/dashboard">Dashboard</a>
-        @if(auth()->user()->role === 'super_admin')
-            <a href="#">Manage Admin</a>
-        @endif
-        @if(in_array(auth()->user()->role, ['school_admin']))
-            <a href="{{ route('register.student') }}">Student Registration</a>
-            <a href="#">Manage Teachar</a>
-            <a href="#">Manage Student</a>
-        @endif
-
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="dropdown-item">Logout</button>
-        </form>
-
-    </div>
-
-    {{-- Main content --}}
-    <div class="main-content">
-
-        {{-- Navbar --}}
-        <div class="navbar d-flex justify-content-between align-items-center">
-            <h3>Dashboard</h3>
-            <div>
-                <span class="text-muted">{{ auth()->user()->email }}</span>
-            </div>
-        </div>
-
-        {{-- Sections based on user role --}}
-        <div class="mt-4">
-
-            @if(auth()->user()->role === 'super_admin')
-                <div class="mb-5">
-                    <h4>Super Admin Screen</h4>
-                    <p>You have full access to add Admin(School)</p>
-                </div>
-
-                {{-- Form to add new admin --}}
-                <div class="card">
-                    <div class="card-header">Add New Admin</div>
-                    <div class="card-body">
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if(session('success'))
-                            <div class="alert alert-success">{{ session('success') }}</div>
-                        @endif
-                         
-                        @if(isset($success))
-                            <div class="alert alert-success"> {{ $success }} </div>
-                        @endif
-                        <form method="POST" action="{{ route('register.store') }}">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label">Name</label>
-                                <input type="text" name="name" class="form-control" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Address</label>
-                                <input type="text" name="address" class="form-control" required>
-                            </div>
+@section('title', 'Dashboard')
 
 
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" required>
-                            </div>
+ @section('pagename')
+  Dashboard
+ @endsection
 
-                            <input type="hidden" name="role" value="admin">
 
-                            <button type="submit" class="btn btn-primary">Add Admin</button>
-                        </form>
+ @section('main-content')
+            <div class="content-grid">
+                <!-- Left Column -->
+                <div class="left-column">
+                    <!-- Recent Orders Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Orders</h3>
+                            <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#ORD-1234</td>
+                                        <td>John Smith</td>
+                                        <td><span class="status-badge success">Completed</span></td>
+                                        <td>$125.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#ORD-1233</td>
+                                        <td>Sarah Johnson</td>
+                                        <td><span class="status-badge warning">Processing</span></td>
+                                        <td>$89.99</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#ORD-1232</td>
+                                        <td>Michael Brown</td>
+                                        <td><span class="status-badge success">Completed</span></td>
+                                        <td>$156.50</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#ORD-1231</td>
+                                        <td>Emily Davis</td>
+                                        <td><span class="status-badge danger">Cancelled</span></td>
+                                        <td>$42.99</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#ORD-1230</td>
+                                        <td>Robert Wilson</td>
+                                        <td><span class="status-badge success">Completed</span></td>
+                                        <td>$210.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            @endif
-
-            @if(auth()->user()->role === 'school_admin')
-                <div class="mb-5">
-                    <h4>Admin Section</h4>
-                    <p>You can manage content but not users or site settings.</p>
+                
+                <!-- Right Column -->
+                <div class="right-column">
+                    <!-- Activity Timeline -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <strong>New user registered</strong> - John Smith signed up
+                                    <div class="activity-time">5 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <strong>New order received</strong> - Order #ORD-1234
+                                    <div class="activity-time">25 minutes ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-ticket-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <strong>New support ticket</strong> - "Product not working"
+                                    <div class="activity-time">1 hour ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <strong>Order completed</strong> - Order #ORD-1233
+                                    <div class="activity-time">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-box-open"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <strong>Product updated</strong> - iPhone 13 Pro Max
+                                    <div class="activity-time">5 hours ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            @endif
-        </div>
-    </div>
-
-    {{-- Bootstrap JS --}}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
-
-    <script>
-    document.getElementById('user_type').addEventListener('change', function () {
-        let type = this.value;
-        let forms = document.querySelectorAll('.user-form');
-        forms.forEach(form => form.style.display = 'none'); // hide all
-        if (type) {
-            document.getElementById('form_' + type).style.display = 'block'; // show selected
-        }
-    });
-
-
-document.addEventListener('DOMContentLoaded', function () {
-        const yesRadio = document.getElementById('parent_yes');
-        const noRadio = document.getElementById('parent_no');
-        const existingParent = document.getElementById('existing_parent_section');
-        const newParent = document.getElementById('new_parent_section');
-
-        yesRadio.addEventListener('change', function () {
-            if (this.checked) {
-                existingParent.style.display = 'block';
-                newParent.style.display = 'none';
-            }
-        });
-
-        noRadio.addEventListener('change', function () {
-            if (this.checked) {
-                existingParent.style.display = 'none';
-                newParent.style.display = 'block';
-            }
-        });
-    });
-
-
-
-
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const childYes = document.getElementById('child_yes');
-        const childNo = document.getElementById('child_no');
-        const existingChild = document.getElementById('existing_child_section');
-        const newChild = document.getElementById('new_child_section');
-
-        childYes.addEventListener('change', function () {
-            if (this.checked) {
-                existingChild.style.display = 'block';
-                newChild.style.display = 'none';
-            }
-        });
-
-        childNo.addEventListener('change', function () {
-            if (this.checked) {
-                existingChild.style.display = 'none';
-                newChild.style.display = 'block';
-            }
-        });
-    });
-
-
-
-
-
-
-  </script>
- 
-
-
-
-
-
-</body>
-
-
-</html>
+            </div>
+ @endsection
