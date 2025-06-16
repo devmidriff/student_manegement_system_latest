@@ -75,9 +75,16 @@
                 </div>
 
                 <div class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('show.goal') }}" class="nav-link">
                         <i class="fas fa-box"></i>
-                        Add Parent 
+                        Add Goal
+                    </a>
+                </div>
+                
+                <div class="nav-item">
+                    <a href="{{ route('goals.assign.form') }}" class="nav-link">
+                        <i class="fas fa-box"></i>
+                       Assign Goal
                     </a>
                 </div>
                

@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Student;
 use App\Models\Parents;
 use App\Models\User;
+use App\Models\ParentStudent;
+use App\Mail\SendLoginDetails;
+use Illuminate\Support\Facades\Mail;
+
 
 class StudentRegisterion extends Controller
 {
@@ -89,6 +93,8 @@ if ($request->parent_registered === 'yes') {
                 ]);
 
 
+
+
             }
 
 
@@ -97,7 +103,10 @@ if ($request->parent_registered === 'yes') {
     public function studentRegisterForm(){
 
          // return view('studentRegisterForm');
-         return view('dashboard.studentRegister');
+            $guardians = Parents::with('user')->get();
+            return view('dashboard.studentRegister', compact('guardians'));
+
+
     }
 
 
@@ -145,118 +154,80 @@ if ($request->parent_registered === 'yes') {
 
     public function submitionProcess(Request $request){
 
- $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'dob' => 'required|date',
-            'gender' => 'required|in:male,female,other',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'admission_date' => 'nullable|date',
-            'admission_number' => 'nullable|string|max:255|unique:students',
-            'class' => 'nullable|string|max:50',
-            'section' => 'nullable|string|max:10',
-            'roll_number' => 'nullable|string|max:50',
-            'house' => 'nullable|string|max:100',
-            'father_name' => 'nullable|string|max:255',
-            'father_occupation' => 'nullable|string|max:255',
-            'father_phone' => 'nullable|string|max:20',
-            'father_email' => 'nullable|email|max:255',
-            'mother_name' => 'nullable|string|max:255',
-            'mother_occupation' => 'nullable|string|max:255',
-            'mother_phone' => 'nullable|string|max:20',
-            'mother_email' => 'nullable|email|max:255',
-            'guardian_address' => 'nullable|string',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'birth_certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
-            'aadhar_card' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
-            'previous_report_card' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120',
-            'terms_agreed' => 'nullable|accepted',
-        ]);
-           
+  $rules = [
+        'name'  => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'phone' => 'required|digits_between:10,15',
+        'address' => 'nullable|string|max:500',
+
+        'guardian_option' => 'nullable|in:existing,new',
+        'existing_guardian_id' => 'nullable|required_if:guardian_option,existing|exists:parents,id',
+        'guardian_name' => 'nullable|required_if:guardian_option,new|string|max:255',
+        'guardian_email' => 'nullable|required_if:guardian_option,new|email|unique:users,email',
+        'guardian_phone' => 'nullable|required_if:guardian_option,new|digits_between:10,15',
+    ];
+    $messages = [
+        'existing_guardian_id.required_if' => 'Please select an existing guardian.',
+        'guardian_name.required_if' => 'Guardian name is required when adding new.',
+        'guardian_email.required_if' => 'Guardian email is required when adding new.',
+        'guardian_phone.required_if' => 'Guardian phone is required when adding new.',
+    ];
+
+     $validated = $request->validate($rules, $messages);
+
 
             $admin  = Auth::user();
-
             $student = User::create([
-                'name' => $validated['first_name'].' '.$validated['last_name'],
+                'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => bcrypt('123456789'),
                 'role' => 'student',
                 'school_id' => $admin->school_id,
             ]);
 
-
+            Mail::raw('Your login email is: '.$validated['email'].' and password is: 123456789', function ($message) use ($validated) {
+                $message->to($validated['email'])
+                        ->subject('Login Details');
+            });
 
             $studentCreate = Student::create([
                 'user_id' => $student->id,
-                'roll_no' => $validated['roll_number'],
-                'dob' =>$validated['dob'],
-                'gender'=>$validated['gender'],
                 'phone'=>$validated['phone'],
                 'address'=>$validated['address'],
-                'admission_date'=>$validated['admission_date'],
-                'admission_number'=>$validated['admission_number'],
-                'class'=>$validated['class'],
-                'section'=>$validated['section'],
-                'roll_number'=>$validated['roll_number'],
-                'house'=>$validated['house'],
-                'father_name'=>$validated['father_name'],
-                'father_occupation'=>$validated['father_occupation'],
-                'father_phone'=>$validated['father_phone'],
-                'father_email'=>$validated['father_email'],
-                'mother_name'=>$validated['mother_name'],
-                'mother_occupation'=>$validated['mother_occupation'],
-                'mother_phone'=>$validated['mother_phone'],
-                'mother_email'=>$validated['mother_email'],
-                'guardian_address'=>$validated['guardian_address'],
-                'photo_path'=>'',
-                'birth_certificate_path'=>'',
-                'aadhar_card_path'=>'',
-                'previous_report_card_path'=>''
             ]);
 
+     if($validated['guardian_option'] == "existing"){
 
-            if (!empty($validated['father_email']) || !empty($validated['mother_email'])) {
-                $nameToSave = null;
-                $emailToSave = null;
+            ParentStudent::create([
+                'parents_id' => $validated['existing_guardian_id'],
+                'student_id' => $studentCreate->id,
+            ]);
 
-                if (!empty($validated['father_email'])) {
-                    $nameToSave = $validated['father_name'];
-                    $emailToSave = $validated['father_email'];
-                } elseif (!empty($validated['mother_email'])) {
-                    $nameToSave = $validated['mother_name'];
-                    $emailToSave = $validated['mother_email'];
-                }
-
-                if ($emailToSave && $nameToSave) {
-                    $parentUser = User::create([
-                        'name'      => $nameToSave,
-                        'email'     => $emailToSave,
-                        'password'  => bcrypt('123456789'),
-                        'role'      => 'parent', 
-                        'school_id' => $admin->school_id,
-                    ]);
-
-                    $parent = Parents::create([
-                        'user_id' => $parentUser->id,
-                        
-                    ]);
-                }
-            }
+     }elseif($validated['guardian_option'] == "new"){
 
 
+            $parent = User::create([
+                'name' => $validated['guardian_name'],
+                'email' => $validated['guardian_email'],
+                'password' => bcrypt('123456789'),
+                'role' => 'parent',
+                'school_id' => $admin->school_id,
+            ]);
+                Mail::raw('Your login email is: '.$validated['guardian_email'].' and password is: 123456789', function ($message) use ($validated) {
+                    $message->to($validated['guardian_email'])
+                            ->subject('Login Details');
+                });
 
+            $parent = Parents::create([
+                'user_id' => $parent->id,
+            ]);
 
+            ParentStudent::create([
+                'parents_id' => $parent->id,
+                'student_id' => $studentCreate->id,
+            ]);
 
-
-
-
-
-
-return array($student,$studentCreate);
-
-
+     }
 
 
 

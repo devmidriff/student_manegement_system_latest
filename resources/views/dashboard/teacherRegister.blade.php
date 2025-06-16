@@ -6,7 +6,7 @@
 <div class="registration-container">
     <h2 class="form-header">Teacher Registration</h2>
     
-    <form id="teacherRegistrationForm" class="registration-form" method="POST" action="{{ route('register.teacher') }}">
+    <form id="teacherRegistrationForm" class="registration-form" method="POST" action="{{ route('registerFrom.teacher') }}">
         @csrf
         
         <!-- Personal Information -->

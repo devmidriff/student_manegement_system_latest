@@ -17,11 +17,15 @@ class Parents extends Model
     ];
  
 
-    public function students()
-    {
-        return $this->belongsToMany(Student::class, 'parent_student');
-    }
-
+    // public function students()
+    // {
+    //     return $this->belongsToMany(Student::class, 'parent_student');
+    // }
+        public function students()
+        {
+            return $this->belongsToMany(Student::class, 'parent_student', 'parents_id', 'student_id')
+                        ->using(ParentStudent::class);
+        }
 
     /**
      * Get the user that owns the parent profile.

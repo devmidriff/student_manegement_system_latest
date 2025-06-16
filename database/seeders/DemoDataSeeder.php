@@ -8,6 +8,9 @@ use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\Parents;
+use App\Models\Goal;
+use App\Models\GoalStudent;
+
 
 class DemoDataSeeder extends Seeder
 {
@@ -60,30 +63,8 @@ class DemoDataSeeder extends Seeder
 
         $student = Student::create([
             'user_id' => $studentUser->id,
-            'roll_no' => '101',
-        'dob' =>'03/08/1998',
-        'gender'=>"male",
-        'phone'=>"1234568",
-        'address'=>"ambala",
-        'admission_date'=>"03/08/2022",
-        'admission_number'=>"123",
-        'class'=>"10",
-        'section'=>"A",
-        'roll_number'=>"135",
-        'house'=>"AMBALA",
-        'father_name'=>"Avtar",
-        'father_occupation'=>"testing",
-        'father_phone'=>"21212",
-        'father_email'=>"1454",
-        'mother_name'=>"Nirmala",
-        'mother_occupation'=>"houese wife",
-        'mother_phone'=>"2545",
-        'mother_email'=>"kdfbshkdf@gmail.com",
-        'guardian_address'=>"father",
-        'photo_path'=>"fhkahdf",
-        'birth_certificate_path'=>"kabdhas",
-        'aadhar_card_path'=>"fsdjfvgsd",
-        'previous_report_card_path'=>"fjgsdvhf"
+            'phone' => '12345678910',
+            'address'=> 'ambala '
         ]);
 
         $parentUser = User::create([
@@ -97,6 +78,21 @@ class DemoDataSeeder extends Seeder
         $parent = Parents::create([
             'user_id' => $parentUser->id,
         ]);
+
+        $goal =   Goal::create([
+            'title' => 'Complete Math Homework',
+            'description' => 'Finish all exercises from Chapter 5',
+            'goal_type' => 'daily',
+            'start_date' => '2025-06-20',
+            'end_date' => '2025-06-25'
+        ]);
+
+        $goalStudent =  GoalStudent::create([
+              'goal_id'=>$goal->id,
+              'student_id'=>$student->id,  
+        ]);
+
+
 
 
         $teacher->students()->attach($student->id);
